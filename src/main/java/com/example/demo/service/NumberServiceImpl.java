@@ -45,15 +45,29 @@ public class NumberServiceImpl implements NumberService {
         // Получаем первый лист из файла
         Sheet sheet = workbook.getSheetAt(0);
 
+        // Переменная для хранения номера первого столбца с данными
+        int dataColumnIndex = -1;
+
         // Проходим по каждой строке листа
         for (Row row : sheet) {
-            // Получаем первую ячейку строки (столбец 0)
-            Cell cell = row.getCell(0);
-
-            // Проверяем, что ячейка не пустая и содержит числовое значение
-            if (cell != null && cell.getCellType() == CellType.NUMERIC) {
-                // Добавляем значение в список чисел
-                numbers.add((int) cell.getNumericCellValue());
+            // Если столбец с данными уже найден
+            if (dataColumnIndex != -1) {
+                // Читаем только из этого столбца
+                Cell cell = row.getCell(dataColumnIndex);
+                if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+                    numbers.add((int) cell.getNumericCellValue());
+                }
+            } else {
+                // Ищем первый столбец с данными
+                for (Cell cell : row) {
+                    if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+                        // Запоминаем индекс столбца с данными
+                        dataColumnIndex = cell.getColumnIndex();
+                        // Добавляем первое число в список
+                        numbers.add((int) cell.getNumericCellValue());
+                        break; // Прекращаем искать другие столбцы
+                    }
+                }
             }
         }
 
